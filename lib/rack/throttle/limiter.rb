@@ -35,6 +35,7 @@ module Rack; module Throttle
       if allowed?(request) 
         status, headers, body = app.call(env)
         cache_set(@key, @stamp) if @key && @stamp && options[:except] && !([options[:except]].flatten.include? status.to_i)
+        [status, headers, body]
       else
         rate_limit_exceeded
       end
