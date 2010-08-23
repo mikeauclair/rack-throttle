@@ -31,7 +31,7 @@ module Rack; module Throttle
       t0 = cache_get(key = cache_key(request)) rescue nil
       allowed = !t0 || (dt = t1 - t0.to_f) >= minimum_interval
       begin
-        cache_set(key, t1)
+        @key, @stamp = key, t1
         allowed
       rescue => e
         # If an error occurred while trying to update the timestamp stored

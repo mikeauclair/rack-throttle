@@ -21,6 +21,7 @@ module Rack; module Throttle
     # @option options [String]  :key_prefix (nil)
     # @option options [Integer] :code       (403)
     # @option options [String]  :message    ("Rate Limit Exceeded")
+    # @option options [Array]  :except    ([302])
     def initialize(app, options = {})
       @app, @options = app, options
     end
@@ -31,7 +32,12 @@ module Rack; module Throttle
     # @see    http://rack.rubyforge.org/doc/SPEC.html
     def call(env)
       request = Rack::Request.new(env)
-      allowed?(request) ? app.call(env) : rate_limit_exceeded
+      if allowed?(request) 
+        status, headers, body = app.call(env)
+        cache_set(@key, @stamp) if @key && @stamp && !(options[:except].include? status.to_i)
+      else
+        rate_limit_exceeded
+      end
     end
 
     ##
