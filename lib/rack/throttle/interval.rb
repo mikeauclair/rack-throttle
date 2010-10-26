@@ -18,7 +18,7 @@ module Rack; module Throttle
     def initialize(app, options = {})
       super
     end
-
+    
     ##
     # Returns `true` if sufficient time (equal to or more than
     # {#minimum_interval}) has passed since the last request and the given
@@ -31,7 +31,8 @@ module Rack; module Throttle
       t0 = cache_get(key = cache_key(request)) rescue nil
       allowed = !t0 || (dt = t1 - t0.to_f) >= minimum_interval
       begin
-        @key, @stamp = key, t1
+        @key, @t1 = key, t1
+        @post_request_cache_hit = Proc.new{cache_set(@key, @t1)}
         allowed
       rescue => e
         # If an error occurred while trying to update the timestamp stored
